@@ -11,7 +11,15 @@ class Controller:
         self._choiceTeam = None
 
     def handleCreaGrafo(self, e):
-        self._model.buildGraph()
+        year = self._view._ddAnno.value
+        if year is None:
+            self._view._txtOutSquadre.controls.clear()
+            self._view._txtOutSqadre.controls.append(
+                ft.Text("Selezionare un anno dal dropdown", color = "red")
+            )
+            self._view.update_page()
+            return
+        self._model.buildGraph(year)
         n, m = self._model.getGraphDetails()
         self._view._txt_result.controls.clear()
         self._view._txt_result.controls.append(
@@ -23,7 +31,29 @@ class Controller:
         self._view.update_page()
 
     def handleDettagli(self, e):
-        pass
+        if self._choiceTeam is None:
+            self._view._txt_result.controls.clear()
+            self._view._txt_result.controls.append(
+                ft.Text("Seleziona una squadra dal menu", color="red")
+            )
+            self._view.update_page()
+            return
+
+        viciniTuples = self._model.getVicini(self._choiceTeam)
+        self._view._txt_result.controls.clear()
+        self._view._txt_result.controls.append(
+            ft.Text(f"Il nodo {self._choiceTeam} ha {len(viciniTuples)} vicini")
+        )
+        self._view._txt_result.controls.append(
+            ft.Text(f"Di seguito una lista ordinata dei vicini:")
+        )
+        for v in viciniTuples:
+            self._view._txt_result.controls.append(
+                ft.Text(f"{v[0]} - peso: {v[1]}")
+            )
+
+        self._view.update_page()
+
 
     def handlePercorso(self, e):
         pass
@@ -47,8 +77,8 @@ class Controller:
         # Questo metodo viene chiamato quando qualcuno ha selezionato un anno dal dropdown,
         # e deve recuperare tutte le squadre che hanno giocato quell'anno e stamparle
         # nel textfield e riempire il dowpdown delle squadre
-
-        if self._view._ddAnno.value is None:
+        year = self._view._ddAnno.value
+        if year is None:
             self._view._txtOutSquadre.controls.clear()
             self._view._txtOutSqadre.controls.append(
                 ft.Text("Selezionare un anno dal dropdown", color = "red")
@@ -56,11 +86,11 @@ class Controller:
             self._view.update_page()
             return
 
-        teams = self._model.getTeamsOfYear(self._view._ddAnno.value)
+        teams = self._model.getTeamsOfYear(year)
 
         self._view._txtOutSquadre.controls.clear()
         self._view._txtOutSquadre.controls.append(
-            ft.Text(f"Per l'anno {self._view._ddAnno.value} sono iscritte al campionato {len(teams)} squadre")
+            ft.Text(f"Per l'anno {year} sono iscritte al campionato {len(teams)} squadre")
         )
 
         for t in teams:
